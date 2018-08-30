@@ -1,0 +1,10 @@
+pre_annot.json
+media/
+media2/
+med/
+yolov2_final.weights
+imagePaths
+pre_imagepaths
+premodel_images/*
+test/
+test2/

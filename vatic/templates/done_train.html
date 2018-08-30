@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <h1>DONE TRAINING</h1>
+</head>
+
+<body>
+    <button id="testSave"> SAVE !!!</button>
+    <script>
+        console.log("hey from done_train.html");
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        var csrftoken = getCookie('csrftoken');
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        testdata = "";
+
+        $('#testSave').click(function () {
+            /*
+                  $.ajaxSetup({
+                    beforeSend: function (jqXHR, settings) {
+                      if (settings.dataType === 'binary') {
+                        settings.xhr().responseType = 'arraybuffer';
+                        settings.processData = false;
+                      }
+                    }
+                  });*/
+            $.ajaxTransport("+binary", function (options, originalOptions, jqXHR) {
+                // check for conditions and support for blob / arraybuffer response type
+                if (window.FormData && ((options.dataType && (options.dataType == 'binary')) || (
+                        options.data && ((
+                            window.ArrayBuffer && options.data instanceof ArrayBuffer) || (
+                            window.Blob && options.data instanceof Blob))))) {
+                    return {
+                        // create new XMLHttpRequest
+                        send: function (headers, callback) {
+                            // setup all variables
+                            var xhr = new XMLHttpRequest(),
+                                url = options.url,
+                                type = options.type,
+                                async = options.async || true,
+                                // blob or arraybuffer. Default is blob
+                                dataType = options.responseType || "blob",
+                                data = options.data || null,
+                                username = options.username || null,
+                                password = options.password || null;
+
+                            xhr.addEventListener('load', function () {
+                                var data = {};
+                                data[options.dataType] = xhr.response;
+                                // make callback and send data
+                                callback(xhr.status, xhr.statusText, data, xhr.getAllResponseHeaders());
+                            });
+
+                            xhr.open(type, url, async, username, password);
+
+                            // setup custom headers
+                            for (var i in headers) {
+                                xhr.setRequestHeader(i, headers[i]);
+                            }
+
+                            xhr.responseType = dataType;
+                            xhr.send(data);
+                        },
+                        abort: function () {
+                            jqXHR.abort();
+                        }
+                    };
+                }
+            });
+            console.log("before ajax");
+            $.ajax({
+                type: 'POST',
+                url: '../../jsontoyolo/',
+                dataType: 'binary',
+                processData: false,
+
+                success: function (data) {
+                    console.log("success!");
+                    console.log(data);
+
+                    var blob_attr = {
+                        type: 'text'
+                    };
+                    filename = "yolov2_final.weights"
+                    var binaryData = [];
+                    binaryData.push(data);
+                    //var url = window.URL.createObjectURL(new Blob(binaryData, {
+                    //  type: "application/zip"
+                    //}));
+                    //save_data_to_local_file(data, 'TESTPICDOWNLOAD.jpg');
+                    var a = document.createElement('a');
+                    a.href = URL.createObjectURL(new Blob(binaryData));
+                    a.target = '_blank';
+                    a.download = filename;
+
+                    // simulate a mouse click event
+                    a.click();
+                }
+            });
+        });
+    </script>
+
+</body>
+
+
+</html>
