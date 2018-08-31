@@ -36,6 +36,7 @@ class jsonToYolo(View):
     def post(self, request):
         if(request.POST.get('premodel') == 'false'):  # for main model
             print("Saving JSON and converting to YOLO")
+            subprocess.call(['rm','media/yolov2_final.weights'])
             jsondata = json.loads(request.POST.get("data[]"))
             with open('data.json', 'w') as outfile:
                 json.dump(jsondata, outfile)
@@ -130,7 +131,7 @@ def convertToYolo(is_premodel):
             print(filename, count, type(filename))
 
             if os.path.isfile(filename):
-                print("FOUNDIT")
+                print("Found Picture")
                 if check_contain_chinese(filename):
                     print(filename + ' is chinese')
                 else:
@@ -219,10 +220,10 @@ def startDocker(premodel):
     # transfer script to docker
     subprocess.call(['docker', 'cp', 'copy_dockerScript.py',
                      'darknetv2:/usr/local/src/darknet'])
-    # time.sleep(10)
-    print("BEFORE DS CALL")
+   
+    print("Starting Training")
     subprocess.call(['nvidia-docker', 'exec', '-it',
                      'darknetv2', 'python', 'copy_dockerScript.py'])
-    print("AFTER DS CALL")
+    print("Ending Training")
 
 
