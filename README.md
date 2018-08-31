@@ -17,7 +17,7 @@ and display those annotations to you so you can edit them.
 2. Python3
 3. Docker
 4. Nvidia-Docker/CUDA
-5. Open-CV
+5. Open-CV for cv2
 
 #### Set up steps for server: ####
 1.  Install all the above, then pull code from github. 
@@ -58,6 +58,11 @@ Basic work flow:
 8.  Since the weights file can range from 50MB to several GB, the file will be sent
     as chunks to the client side for the user to download when they click the download
     button. 
+
+
+More Detailed Work Flow:
+
+Will write a detailed work flow of all the files!
 
 
 
