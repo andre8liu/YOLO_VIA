@@ -1,6 +1,15 @@
 # YOLO_VIA
 
-Items to download for Server setup:
+This application combines several steps of training a DNN using YOLO. You just upload
+your images, annotate the images, configure the YOLO settings, then press train and
+the application will begin the training and allow you to download the weights file
+when it is done. The application also has a auto annotating feature where you annotate
+only a portion of your images. The application will take these pictures and train a
+premodel. It will then use this premodel to detect objects in the remaining pictures
+and display those annotations to you so you can edit them. 
+
+
+####Items to download for Server setup:
 1. Django
 2. Python3
 3. Docker
