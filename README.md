@@ -9,7 +9,7 @@ premodel. It will then use this premodel to detect objects in the remaining pict
 and display those annotations to you so you can edit them. 
 
 
-####Items to download for Server setup: ####
+#### Items to download for Server setup: ####
 1. Django
 2. Python3
 3. Docker
