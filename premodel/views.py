@@ -5,7 +5,7 @@ from django.http import HttpResponse
 # Create your views here.
 #from django.http import HttpResponse
 from django.views import View
-
+######################## UNUSED VIEW ################################
 
 class premodel(View):
     def get(self,request):

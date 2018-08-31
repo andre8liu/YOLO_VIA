@@ -11,46 +11,27 @@ from shutil import move
 from os import fdopen, remove
 import subprocess
 
-# coding=utf-8
 import json
 import cv2
 import os
 from importlib import reload
 import sys
 reload(sys)
-# Create your views here.
 
 
 class viaView(View):
-    # def index(request):
-     # return render(request, 'via.html')
 
     def get(self, request):
-        print("hey!!")
         testView = viaView()
-        # return HttpResponse("<h1>Hello from python</h1>")
         return render(request, 'via.html', {'testView': testView})
 
     def post(self, request):
-        #global subdiv, batches
-        # print(request.POST)
-        #print(subdiv, batches)
-        #batches = request.POST.get('batches')
-
-        #subdiv = request.POST.get('subdiv')
-        #print(subdiv, batches)
-        # replace_(docker_script, "replace_(settings,'# batch=64','batch=8')",
-        #        "replace_(settings,'# batch=64','batch= " + batches + "')")
-
-        print("POST RUNNING")
 
         print(request.FILES.getlist('files[]'))
 
         if(request.FILES.getlist('files[]')) != []:
             print("Saving images")
-            # print(len(data))
             imgdirname = './media/images/'
-            # subprocess.call(['rm','-rf',imgdirname])
             subprocess.call(['mkdir', '-p', imgdirname])
             data = request.FILES.getlist('files[]')
             numFiles = len(data)
@@ -60,9 +41,8 @@ class viaView(View):
                     imagePathName, ContentFile(data[x].read()))
                 tmp_file = os.path.join(settings.MEDIA_ROOT, path)
         else:
-            #global subdiv, batches
             print(request.POST)
-            #print(subdiv, batches)
+            print("Saving Specifications")
             premodel = request.POST.get('premodel')
             batches = request.POST.get('batches')
             subdiv = request.POST.get('subdiv')
@@ -99,22 +79,7 @@ class viaView(View):
             replace_(docker_script, "replace_(settings,'learning_rate=0.001','learning_rate=0.001')",
                      "replace_(settings,'learning_rate=0.001','learning_rate=" + rate + "')")
 
-            # make values in testScript to normal numbers
-
-            #print("Saving JSON and converting to YOLO")
-            #jsondata = json.loads(request.POST.get("data[]"))
-            # print(jsondata)
-            # with open('data.json', 'w') as outfile:
-            #    json.dump(jsondata, outfile)
-            # convertToYolo()
-
-        # print(str(data))
-        return HttpResponse("hey from post return")
-
-
-# need
-# so html file is going to have many post requests,
-# starts with for loop in html file to post every picture in the array so that
+        return HttpResponse("Settings Configured")
 
 
 def replace_(file_path, pattern, subst):
@@ -124,9 +89,7 @@ def replace_(file_path, pattern, subst):
         with open(file_path) as old_file:
             for line in old_file:
                 new_file.write(line.replace(pattern, subst))
-    # Remove original file
     remove(file_path)
-    # Move new file
     move(abs_path, file_path)
     return 1
 

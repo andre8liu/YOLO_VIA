@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views import View
-#from . import read
 from PIL import Image
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -11,7 +10,6 @@ from shutil import move
 from os import fdopen, remove
 import subprocess
 from subprocess import Popen, PIPE
-# Create your views here.
 
 import json
 import cv2
@@ -24,11 +22,7 @@ reload(sys)
 import mimetypes
 from django.http import StreamingHttpResponse
 from wsgiref.util import FileWrapper
-# things to fix
-# DONEconfigering learning rate
-# LATERforcing first table to be 'Objects'
-# DONEremoving images dir then making new one
-# adding training command
+
 
 
 class jsonToYolo(View):
@@ -36,65 +30,50 @@ class jsonToYolo(View):
         with open('pre_annot.json') as json_file:
             data = json.load(json_file)
             print(data)
-        #yoloView = jsonToYolo()
         return HttpResponse(json.dumps({'data':data}),content_type = 'application/json')
 
-    def post(self, request):
-       
 
+    def post(self, request):
         if(request.POST.get('premodel') == 'false'):  # for main model
-            print(request.POST.get("premodel"))
             print("Saving JSON and converting to YOLO")
             jsondata = json.loads(request.POST.get("data[]"))
-            #print(request.POSt)
             with open('data.json', 'w') as outfile:
                 json.dump(jsondata, outfile)
             convertToYolo(False)
-            print("BEFORE START DOCKER")
+            print("Starting Docker")
             startDocker(False)
-            print("AFTER START DOCKER")
+            print("Stopping Docker")
             subprocess.call(['rm', '-rf', './media/images/'])
             subprocess.call(['rm', '-rf', './media/labels/'])
             subprocess.call(['rm','-rf', './premodel_images'])
             subprocess.call(['docker','cp','darknetv2:usr/local/src/darknet/yolov2_final.weights','./media'])
-            return HttpResponse("hey from post return")
+            return HttpResponse("Model Done Training")
         elif request.POST.get('premodel') == 'true':  # for premodel
-            print(request.POST.get("premodel"))
             print("Saving JSON and converting to YOLO")
             jsondata = json.loads(request.POST.get("data[]"))
-            #print(request.POSt)
             with open('data.json', 'w') as outfile:
                 json.dump(jsondata, outfile)
+
             convertToYolo(True)
-            print("BEFORE START DOCKER")
+
+            print("Starting Docker")
             startDocker(True)
-            print("AFTER START DOCKER")
+            print("Stopping Docker")
 
             subprocess.call(['docker','cp','darknetv2:usr/local/src/darknet/pre_annot.json','.'])
             subprocess.call(['cp','-a','premodel_images/.','media/images'])
             subprocess.call(['rm', '-r','premodel_images'])
 
             #might have to move pictures back to images folder
-            return(HttpResponse("hi"))
+            return(HttpResponse("Premodel Done Training"))
         else:
-            print("SUPPOSED TO BE DOWNLOADINGS")
             return(download(request,'yolov2_final.weights'))
 
-# GOING TO MOVE DOWNLOAD TO ANOTHER FILE
 def download(request, path):
     response = HttpResponse()
-    #file_path = os.path.join(settings.MEDIA_ROOT, path)
     the_file = os.path.join(settings.MEDIA_ROOT, path)
     filename = path
-    # subprocess.call('pwd')
-    # print(file_path)
     if os.path.exists(the_file):
-        print("HI FROM DOWNLOAD")
-        # with open(file_path, 'rb') as fh:
-        #    response = HttpResponse(fh.read(), content_type="application/octet-stream")
-        #    response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
-        #    print(response)
-        #    return response
         chunk_size = 8192
         response = StreamingHttpResponse(FileWrapper(open(the_file, 'rb'), chunk_size),
                                          content_type=mimetypes.guess_type(the_file)[0])
@@ -143,7 +122,6 @@ def convertToYolo(is_premodel):
 
     with open(jsonname, 'r') as f:
         data = json.loads(f.readline())
-        # print data
         print(len(data))
         for key1 in data.keys():  # goes through each picture
 
@@ -173,7 +151,7 @@ def convertToYolo(is_premodel):
                             pre_imagepaths.write(filepath.encode('gbk'))
                             pre_imagepaths.write('\n'.encode('gbk'))
                             # moving premodel inference images to new folder
-                            print("NO ANNOTATIONS FOR THIS PIC")
+                            print("There are no annotations for this picture")
                             continue
                     listdata.write(filepath.encode('gbk'))
                     listdata.write('\n'.encode('gbk'))
@@ -203,7 +181,7 @@ def convertToYolo(is_premodel):
                                   (objDict[obj], xn+wn/2, yn+hn/2, wn, hn))
                             image = cv2.rectangle(
                                 image, (x, y), (x+w, y+h), (255, 0, 0), 1)
-                    # cv2.imshow('test', image) DONT NEED TO SHOW IMAGE
+                    # cv2.imshow('test', image) 
                     # cv2.waitKey(0)
                     count += 1
 
@@ -220,7 +198,6 @@ def startDocker(premodel):
     #subprocess.call(['docker', 'start', 'darknetv2'])
     # tranfering images
     if premodel:
-        print("COPYING PREMODEL IMAGES")
         subprocess.call(['docker', 'cp', 'premodel_images',
                          'darknetv2:usr/local/src/darknet'])
 
@@ -249,20 +226,3 @@ def startDocker(premodel):
     print("AFTER DS CALL")
 
 
-# cp rest of the pictures into a different directory. so we do need to have another
-# script for the premodel so that it can run inference then write to a file.
-# Then import these changes. Send it as a post request.
-
-'''
-TODO:
-1. change to via 2.0
-2. DONE distinguish between premodel post and normal post
-3. Ehhhow to delete those pictures (maybe we can change when we post)
-4. DONEwrite premodel inference script 
-5. DONE write darknet inference method in darknetv2 
-6. DONEmake new image of darknetv2
-7. CLEAN
-#we can make a seperate imagepaths file for the inf images and pass them in here
-can also copy predockerscript by checking post request data
-DONEcan use preimage paths file to move images back 
-'''
